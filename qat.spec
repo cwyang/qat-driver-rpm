@@ -126,11 +126,18 @@ fi
 
 export ICP_ROOT=%{qatsrcdir}
 export ICP_BUILD_OUTPUT=%{qatbuilddir}
+export ICP_SRIOV_AM=0
+if lspci -v |grep SR-IOV >& /dev/null; then
+    ICP_SRIOV_AM=1
+fi
+
 tar xfz %{qatbasedir}/%{source} -C %{qatsrcdir}
-echo "%{name}-%{version} install started at $(date)" &>> %{qatbasedir}/install.txt
+cd %{qatsrcdir}
+echo "%{name}-%{version} install started at $(date), pwd=$(pwd), SR-IOV=${ICP_SRIOV_AM}" | tee -a %{qatbasedir}/install.txt
+
 touch %{qatsrcdir}/config.status
-make ADF_CTL_DIR=%{qatbuilddir} adf-ctl-install &>> %{qatbasedir}/install.txt
-make ICP_BUILD_OUTPUT=%{qatbuilddir} qat-service-install &>> %{qatbasedir}/install.txt
+make ADF_CTL_DIR=%{qatbuilddir} adf-ctl-install 2>&1 | tee -a %{qatbasedir}/install.txt
+make ICP_BUILD_OUTPUT=%{qatbuilddir} qat-service-install 2>&1 | tee -a %{qatbasedir}/install.txt
 
 %postun
 if [ $1 == 0 ]; then
@@ -139,5 +146,7 @@ if [ $1 == 0 ]; then
 fi
 
 %changelog
+* Sat Oct 6 2020 Chul-Woong Yang <cwyang@gmail.com>
+- fix post to detect SR-IOV on target machine
 * Sat Sep 26 2020 Chul-Woong Yang <cwyang@gmail.com>
 - Initial work
