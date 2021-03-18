@@ -40,7 +40,7 @@ Following data can be specified by `rpmbuild --define "key value"`:
 
 %prep
 %setup -c
-%patch0
+%patch0 -p1
 
 %build
 KSP=(/lib/modules/%{kver}/source \
