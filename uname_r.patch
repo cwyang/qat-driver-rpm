@@ -1,0 +1,43 @@
+diff -Naur orig/Makefile.in work/Makefile.in
+--- orig/Makefile.in	2020-09-09 22:26:07.000000000 +0900
++++ work/Makefile.in	2021-03-18 14:43:32.010090600 +0900
+@@ -12,6 +12,8 @@
+ # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ # PARTICULAR PURPOSE.
+ 
++KVER=`uname -r`
++
+ @SET_MAKE@
+ 
+ ######################
+@@ -308,7 +310,7 @@
+ ICP_CORE = ia
+ ICP_OS = linux_2.6
+ KERNEL_SOURCE_DIR = $(ICP_ROOT)/quickassist/qat
+-KERNEL_SOURCE_ROOT_UPDATE = /lib/modules/`uname -r`/updates
++KERNEL_SOURCE_ROOT_UPDATE = /lib/modules/$(KVER)/updates
+ SC_EPOLL_DISABLED = 0
+ LATENCY_CODE = 1
+ OS = "`\uname -m`"
+@@ -1331,8 +1333,8 @@
+ 			$(ECHO) "Need to sign driver $(ICP_BUILD_OUTPUT)/qat_api.ko."; \
+ 			$(mod_sign_cmd) $(ICP_BUILD_OUTPUT)/qat_api.ko; \
+ 		fi;	\
+-		$(CP) -f  $(ICP_BUILD_OUTPUT)/usdm_drv.ko  "/lib/modules/`\uname -r`/kernel/drivers";	\
+-		$(CP) -f  $(ICP_BUILD_OUTPUT)/qat_api.ko  "/lib/modules/`\uname -r`/kernel/drivers";	\
++		$(CP) -f  $(ICP_BUILD_OUTPUT)/usdm_drv.ko  "/lib/modules/$(KVER)/kernel/drivers";	\
++		$(CP) -f  $(ICP_BUILD_OUTPUT)/qat_api.ko  "/lib/modules/$(KVER)/kernel/drivers";	\
+ 		if [ ! `getent group qat` ]; then $(ECHO) "Creating qat group."; groupadd qat; else $(ECHO) "Group qat already exists."; fi;	\
+ 		$(ECHO) "Creating udev rules";	\
+ 		$(RM) /etc/udev/rules.d/00-qat.rules;								\
+@@ -1512,8 +1514,8 @@
+ 													\
+ 		$(ECHO) "Removing drivers modules";							\
+ 		$(RM) $(KERNEL_SOURCE_ROOT_UPDATE)/drivers/crypto/qat;					\
+-                $(RM)   "/lib/modules/`\uname -r`/kernel/drivers"/usdm_drv.ko;		        	\
+-                $(RM)   "/lib/modules/`\uname -r`/kernel/drivers"/qat_api.ko;		        	\
++                $(RM)   "/lib/modules/$(KVER)/kernel/drivers"/usdm_drv.ko;		        	\
++                $(RM)   "/lib/modules/$(KVER)/kernel/drivers"/qat_api.ko;		        	\
+ 		$(ECHO) "Creating module.dep file for QAT released kernel object";			\
+ 		depmod -a;										\
+ 													\

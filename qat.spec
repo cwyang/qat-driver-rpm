@@ -8,6 +8,7 @@ Vendor: Intel Corporation
 License: GPL-2.0
 Source: %{source}
 URL: https://01.org/sites/default/files/downloads/%{source}
+Patch0: uname_r.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 Provides: %{name}
 Requires: pciutils
@@ -39,6 +40,7 @@ Following data can be specified by `rpmbuild --define "key value"`:
 
 %prep
 %setup -c
+%patch0
 
 %build
 KSP=(/lib/modules/%{kver}/source \
@@ -133,20 +135,22 @@ fi
 
 tar xfz %{qatbasedir}/%{source} -C %{qatsrcdir}
 cd %{qatsrcdir}
-echo "%{name}-%{version} install started at $(date), pwd=$(pwd), SR-IOV=${ICP_SRIOV_AM}" | tee -a %{qatbasedir}/install.txt
+echo "%{name}-%{version} install started at $(date), kver=%{kver}, pwd=$(pwd), SR-IOV=${ICP_SRIOV_AM}" | tee -a %{qatbasedir}/install.txt
 
 touch %{qatsrcdir}/config.status
 make ADF_CTL_DIR=%{qatbuilddir} adf-ctl-install 2>&1 | tee -a %{qatbasedir}/install.txt
-make ICP_BUILD_OUTPUT=%{qatbuilddir} qat-service-install 2>&1 | tee -a %{qatbasedir}/install.txt
+make KVER=%{kver} ICP_BUILD_OUTPUT=%{qatbuilddir} qat-service-install 2>&1 | tee -a %{qatbasedir}/install.txt
 
 %postun
 if [ $1 == 0 ]; then
     /etc/init.d/qat_service shutdown
-    %{qatsrcdir}/make qat-service-uninstall
+    %{qatsrcdir}/make KVER=%{kver} qat-service-uninstall
 fi
 
 %changelog
-* Sat Oct 6 2020 Chul-Woong Yang <cwyang@gmail.com>
+* Thu Mar 18 2021 Chul-Woong Yang <cwyang@gmail.com>
+- qat-service-[un]install uses %kver
+* Tue Oct 6 2020 Chul-Woong Yang <cwyang@gmail.com>
 - fix post to detect SR-IOV on target machine
 * Sat Sep 26 2020 Chul-Woong Yang <cwyang@gmail.com>
 - Initial work
