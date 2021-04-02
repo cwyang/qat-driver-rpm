@@ -1,7 +1,7 @@
 Summary: cwyang's Intel QAT driver RPM package
 Name: qat
 Version: 1.7.l.4.11.0
-Release: 00001
+Release: 00001.%{?dist}
 Group: System Environment/Kernel
 ExclusiveOS: linux
 Vendor: Intel Corporation
@@ -78,6 +78,10 @@ cp Makefile %{buildroot}%{qatsrcdir}
 find %{buildroot}/lib/modules/ -name 'modules.*' -exec rm -f {} \;
 (cd %{buildroot}; find lib -name "*.ko" \
 	-fprintf %{_builddir}/%{name}-%{version}/file.list "/%p\n")
+
+# Strip the modules(s).
+DS="%{dist}" && [ -z "${DS##*dev*}" ] || \
+        find %{buildroot} -type f -name \*.ko -exec %{__strip} --strip-debug \{\} \;
 
 # sign all modules if privkey is provided
 %if 0%{?privkey:1}
