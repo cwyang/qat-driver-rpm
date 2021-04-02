@@ -6,7 +6,8 @@ Group: System Environment/Kernel
 ExclusiveOS: linux
 Vendor: Intel Corporation
 License: GPL-2.0
-Source: %{source}
+Source0: %{source}
+Source1: qat_contig_mem.tar.gz
 URL: https://01.org/sites/default/files/downloads/%{source}
 Patch0: uname_r.patch
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -39,7 +40,7 @@ Following data can be specified by `rpmbuild --define "key value"`:
 - pubkey  [Kernel module signing public key file]
 
 %prep
-%setup -c
+%setup -c -b 1
 %patch0 -p1
 
 %build
@@ -57,13 +58,16 @@ KSRCS=( $(for i in ${KSP[@]}; do if [ -e $i/include/linux ]; then echo $i; fi;  
 
 export KERNEL_SOURCE_ROOT=${KSRCS[0]}
 export ICP_AUTO_DEVICE_RESET_ON_HB=1
-echo "Building driver on kernel %{kver}.."
+echo "Building qat driver on kernel %{kver}.."
 %configure
 make %{?_smp_mflags} all #samples
-
+export PATH_AUTOCNF=include/generated # for centos
+echo "Building qat_contig_mem driver on kernel %{kver}.."
+(cd qat_contig_mem; make %{?_smp_mflags} all)
 %install
 rm -rf %{buildroot}
 make INSTALL_MOD_PATH=%{buildroot} %{?_smp_mflags} qat-driver-install
+make INSTALL_MOD_PATH=%{buildroot} INSTALL_MOD_DIR=updates -C /lib/modules/%{kver}/build M=`pwd`/qat_contig_mem mod_sign_cmd=":" modules_install
 
 mkdir -p %{buildroot}%{qatbuilddir}
 cp %{_sourcedir}/%{source} %{buildroot}%{qatbasedir}
@@ -148,6 +152,8 @@ if [ $1 == 0 ]; then
 fi
 
 %changelog
+* Thu Apr 2 2021 Chul-Woong Yang <cwyang@gmail.com>
+- add qat_contig_mem.ko
 * Thu Mar 18 2021 Chul-Woong Yang <cwyang@gmail.com>
 - qat-service-[un]install uses %kver
 * Tue Oct 6 2020 Chul-Woong Yang <cwyang@gmail.com>
