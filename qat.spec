@@ -67,6 +67,7 @@ echo "Building qat_contig_mem driver on kernel %{kver}.."
 (cd qat_contig_mem; make %{?_smp_mflags} all)
 %install
 rm -rf %{buildroot}
+sed -i 's/NumProcesses = 1/NumProcesses = 2/' build/*.conf build/*.conf.vm
 make INSTALL_MOD_PATH=%{buildroot} %{?_smp_mflags} qat-driver-install
 make INSTALL_MOD_PATH=%{buildroot} INSTALL_MOD_DIR=updates -C /lib/modules/%{kver}/build M=`pwd`/qat_contig_mem mod_sign_cmd=":" modules_install
 
@@ -149,6 +150,8 @@ echo "%{name}-%{version} install started at $(date), kver=%{kver}, pwd=$(pwd), S
 touch %{qatsrcdir}/config.status
 make ADF_CTL_DIR=%{qatbuilddir} adf-ctl-install 2>&1 | tee -a %{qatbasedir}/install.txt
 make KVER=%{kver} ICP_BUILD_OUTPUT=%{qatbuilddir} qat-service-install 2>&1 | tee -a %{qatbasedir}/install.txt
+echo "qat_contig_mem" > /etc/modules-load.d/qat_contig_mem.conf | tee -a %{qatbasedir}/install.txt
+modprobe qat_contig_mem
 
 %postun
 if [ $1 == 0 ]; then
@@ -157,8 +160,11 @@ if [ $1 == 0 ]; then
 fi
 
 %changelog
+* Wed Sep 1 2021 Chul-Woong Yang <cwyang@gmail.com>
+- setting NumProcesses of qat device configuration file to 2
+- create /etc/modules-load.d/qat_contig_mem.conf
 * Fri Apr 2 2021 Chul-Woong Yang <cwyang@gmail.com>
-- add qat_contig_mem.ko
+- add qat_contig_mem.ko and modprobe it
 * Thu Mar 18 2021 Chul-Woong Yang <cwyang@gmail.com>
 - qat-service-[un]install uses %kver
 * Tue Oct 6 2020 Chul-Woong Yang <cwyang@gmail.com>
