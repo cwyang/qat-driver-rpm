@@ -1,7 +1,7 @@
 Summary: cwyang's Intel QAT driver RPM package
 Name: qat
 Version: 1.7.l.4.11.0
-Release: 00001.%{?dist}
+Release: 00001
 Group: System Environment/Kernel
 ExclusiveOS: linux
 Vendor: Intel Corporation
@@ -21,6 +21,7 @@ Requires: pciutils
 %global qatsrcdir %{qatbasedir}/%{name}%{version}
 %global qatbuilddir %{qatsrcdir}/build
 %define debug_package %{nil}
+%define _rpmfilename %{name}-%{version}-%{release}.%{kver}.rpm
 
 # Check for existence of %kernel_module_package_buildreqs ...
 %if 0%{?!kernel_module_package_buildreqs:1}
@@ -156,7 +157,7 @@ if [ $1 == 0 ]; then
 fi
 
 %changelog
-* Thu Apr 2 2021 Chul-Woong Yang <cwyang@gmail.com>
+* Fri Apr 2 2021 Chul-Woong Yang <cwyang@gmail.com>
 - add qat_contig_mem.ko
 * Thu Mar 18 2021 Chul-Woong Yang <cwyang@gmail.com>
 - qat-service-[un]install uses %kver
